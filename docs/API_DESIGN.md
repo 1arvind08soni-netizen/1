@@ -1,154 +1,261 @@
-# API Design - Jewelry Shop Management System
+# API Design & Endpoints
 
-## Authentication Endpoints
+## Base URL
+```
+http://localhost:5000/api
+```
 
-### POST /api/auth/register
-Register new user account
+## Authentication
 
-**Request:**
-```json
+All protected endpoints require JWT token in Authorization header:
+```
+Authorization: Bearer <token>
+```
+
+### Register User
+```http
+POST /auth/register
+Content-Type: application/json
+
 {
-  "username": "user123",
+  "username": "user@example.com",
   "email": "user@example.com",
-  "password": "secure_password",
+  "password": "password123",
   "full_name": "John Doe",
-  "role": "manager"
+  "role": "user"
 }
-```
 
-**Response:** 201 Created
-```json
+Response (201):
 {
-  "id": 1,
-  "username": "user123",
-  "email": "user@example.com",
-  "full_name": "John Doe",
-  "token": "jwt_token_here"
-}
-```
-
-### POST /api/auth/login
-Login user
-
-**Request:**
-```json
-{
-  "username": "user123",
-  "password": "secure_password"
-}
-```
-
-**Response:** 200 OK
-```json
-{
-  "token": "jwt_token_here",
+  "success": true,
+  "message": "User registered successfully",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "id": 1,
-    "username": "user123",
+    "username": "user@example.com",
     "email": "user@example.com",
-    "role": "manager"
+    "full_name": "John Doe",
+    "role": "user"
   }
 }
 ```
 
----
+### Login
+```http
+POST /auth/login
+Content-Type: application/json
 
-## Client Management Endpoints
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
 
-### GET /api/clients
-Get all clients
+Response (200):
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "username": "user@example.com",
+    "email": "user@example.com",
+    "full_name": "John Doe",
+    "role": "user"
+  }
+}
+```
 
-**Response:** 200 OK
-```json
+## Clients
+
+### Get All Clients
+```http
+GET /clients?page=1&limit=20
+Authorization: Bearer <token>
+
+Response (200):
 {
   "success": true,
   "data": [
     {
       "id": 1,
-      "name": "ABC Jewelry Shop",
+      "name": "Client Name",
       "phone": "9876543210",
-      "email": "contact@abc.com",
-      "credit_limit": 50000,
-      "current_due": 5000
+      "email": "client@example.com",
+      "address": "123 Main St",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "pincode": "400001",
+      "gst_number": "27AABCT1234H1Z0",
+      "credit_limit": 100000,
+      "current_due": 5000,
+      "created_at": "2026-06-26T00:00:00Z"
     }
   ],
-  "total": 10,
-  "page": 1
+  "total": 50,
+  "page": 1,
+  "limit": 20
 }
 ```
 
-### POST /api/clients
-Create new client
+### Create Client
+```http
+POST /clients
+Authorization: Bearer <token>
+Content-Type: application/json
 
-**Request:**
-```json
 {
-  "name": "XYZ Jewelry",
+  "name": "New Client",
   "phone": "9876543210",
-  "email": "xyz@example.com",
+  "email": "client@example.com",
   "address": "123 Main St",
   "city": "Mumbai",
   "state": "Maharashtra",
   "pincode": "400001",
+  "gst_number": "27AABCT1234H1Z0",
   "credit_limit": 100000
 }
-```
 
-**Response:** 201 Created
-
-### GET /api/clients/:id
-Get client details
-
-### PUT /api/clients/:id
-Update client information
-
-### DELETE /api/clients/:id
-Delete client
-
----
-
-## Product/Inventory Endpoints
-
-### GET /api/products
-Get all products with stock
-
-### POST /api/products
-Create new product
-
-**Request:**
-```json
+Response (201):
 {
-  "name": "Gold Ring",
-  "metal_type": "gold",
-  "weight": 5.5,
-  "weight_unit": "grams",
-  "purity": "22K",
-  "buying_price": 5500,
-  "selling_price": 6000
+  "success": true,
+  "data": {
+    "id": 2,
+    "name": "New Client",
+    "phone": "9876543210",
+    ...
+  }
 }
 ```
 
-### GET /api/products/barcode/:barcode
-Get product by barcode
+### Get Client by ID
+```http
+GET /clients/:id
+Authorization: Bearer <token>
 
-### PUT /api/products/:id
-Update product
+Response (200):
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "Client Name",
+    ...
+  }
+}
+```
 
-### GET /api/inventory/stock-report
-Get inventory stock report
+### Update Client
+```http
+PUT /clients/:id
+Authorization: Bearer <token>
+Content-Type: application/json
 
-### POST /api/inventory/adjust-stock
-Adjust stock for a product
+{
+  "name": "Updated Name",
+  "phone": "9876543210",
+  ...
+}
 
----
+Response (200):
+{
+  "success": true,
+  "data": { ... }
+}
+```
 
-## Sales/Billing Endpoints
+### Delete Client
+```http
+DELETE /clients/:id
+Authorization: Bearer <token>
 
-### POST /api/sales
-Create new sale/invoice
+Response (200):
+{
+  "success": true,
+  "message": "Client deleted successfully"
+}
+```
 
-**Request:**
-```json
+## Products
+
+### Get All Products
+```http
+GET /products?page=1&limit=20
+Authorization: Bearer <token>
+
+Response (200):
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "product_code": "PROD-ABC123",
+      "name": "Gold Ring",
+      "description": "18K Gold Ring",
+      "metal_type": "gold",
+      "weight": 5.5,
+      "weight_unit": "gm",
+      "purity": 750,
+      "buying_price": 5000,
+      "selling_price": 6000,
+      "quantity_in_stock": 10,
+      "barcode_data": "BC-1234567890",
+      "status": "active"
+    }
+  ],
+  "total": 100,
+  "page": 1,
+  "limit": 20
+}
+```
+
+### Create Product
+```http
+POST /products
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Gold Necklace",
+  "description": "18K Gold Necklace",
+  "metal_type": "gold",
+  "weight": 15,
+  "weight_unit": "gm",
+  "purity": 750,
+  "buying_price": 15000,
+  "selling_price": 18000
+}
+
+Response (201):
+{
+  "success": true,
+  "data": {
+    "id": 2,
+    "product_code": "PROD-XYZ789",
+    "barcode_data": "BC-9876543210",
+    ...
+  }
+}
+```
+
+### Get Product by Barcode
+```http
+GET /products/barcode/:barcode
+Authorization: Bearer <token>
+
+Response (200):
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+## Sales
+
+### Create Sale
+```http
+POST /sales
+Authorization: Bearer <token>
+Content-Type: application/json
+
 {
   "client_id": 1,
   "items": [
@@ -156,251 +263,321 @@ Create new sale/invoice
       "product_id": 1,
       "quantity": 2,
       "unit_price": 6000
+    },
+    {
+      "product_id": 2,
+      "quantity": 1,
+      "unit_price": 18000
     }
   ],
-  "tax_amount": 2160,
-  "discount_amount": 1000,
+  "tax_amount": 4320,
+  "discount_amount": 2000,
   "payment_mode": "cash",
-  "notes": "Sale from store"
+  "notes": "Customer paid in cash"
+}
+
+Response (201):
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "invoice_number": "INV-1234567890",
+    "client_id": 1,
+    "total_amount": 30000,
+    "tax_amount": 4320,
+    "discount_amount": 2000,
+    "net_amount": 32320,
+    "payment_status": "pending",
+    "payment_mode": "cash"
+  }
 }
 ```
 
-**Response:** 201 Created
-```json
+### Get All Sales
+```http
+GET /sales?page=1&limit=20
+Authorization: Bearer <token>
+
+Response (200):
 {
-  "id": 1,
-  "invoice_number": "INV-2024-001",
+  "success": true,
+  "data": [ ... ],
+  "total": 150,
+  "page": 1,
+  "limit": 20
+}
+```
+
+### Get Sale by ID
+```http
+GET /sales/:id
+Authorization: Bearer <token>
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "invoice_number": "INV-1234567890",
+    "items": [
+      {
+        "id": 1,
+        "product_id": 1,
+        "quantity": 2,
+        "unit_price": 6000,
+        "line_total": 12000
+      }
+    ],
+    ...
+  }
+}
+```
+
+## Quotations
+
+### Create Quotation
+```http
+POST /quotations
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
   "client_id": 1,
-  "net_amount": 13160,
-  "payment_status": "pending"
-}
-```
-
-### GET /api/sales
-List all sales
-
-### GET /api/sales/:id
-Get sale details
-
-### GET /api/sales/:id/print
-Get printable invoice
-
-### PUT /api/sales/:id/payment-status
-Update payment status
-
----
-
-## Purchase Endpoints
-
-### POST /api/purchases
-Create new purchase
-
-**Request:**
-```json
-{
-  "supplier_id": 1,
+  "quote_type": "selling",
   "items": [
     {
       "product_id": 1,
-      "quantity": 10,
-      "unit_price": 5000
-    }
-  ],
-  "tax_amount": 1800,
-  "discount_amount": 500,
-  "payment_mode": "bank_transfer"
-}
-```
-
-### GET /api/purchases
-List all purchases
-
-### GET /api/purchases/:id
-Get purchase details
-
----
-
-## Quotation Endpoints
-
-### POST /api/quotations
-Create new quotation
-
-**Request:**
-```json
-{
-  "client_id": 1,
-  "quote_type": "sell",
-  "items": [
-    {
-      "product_id": 1,
-      "quantity": 3,
+      "quantity": 5,
       "unit_price": 6000
     }
   ],
-  "expiry_date": "2024-12-31"
+  "expiry_date": "2026-07-26"
+}
+
+Response (201):
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "quote_number": "QT-1234567890",
+    "client_id": 1,
+    "total_amount": 30000,
+    "tax_amount": 5400,
+    "net_amount": 35400,
+    "status": "pending"
+  }
 }
 ```
 
-### GET /api/quotations
-List all quotations
+### Update Quotation Status
+```http
+PUT /quotations/:id/status
+Authorization: Bearer <token>
+Content-Type: application/json
 
-### GET /api/quotations/:id
-Get quotation details
+{
+  "status": "accepted"
+}
 
-### PUT /api/quotations/:id/status
-Update quotation status (accepted, rejected, expired)
+Response (200):
+{
+  "success": true,
+  "data": { ... }
+}
+```
 
-### POST /api/quotations/:id/convert-to-sale
-Convert quotation to sale
+## Loans
 
----
+### Create Loan
+```http
+POST /loans
+Authorization: Bearer <token>
+Content-Type: application/json
 
-## Loan Management Endpoints
-
-### POST /api/loans
-Create new loan account
-
-**Request:**
-```json
 {
   "client_id": 1,
-  "principal_amount": 100000,
-  "interest_rate": 12.5,
-  "loan_start_date": "2024-01-01",
+  "principal_amount": 500000,
+  "interest_rate": 12,
+  "loan_start_date": "2026-06-26",
   "total_duration_months": 12
 }
-```
 
-### GET /api/loans
-List all loans
-
-### GET /api/loans/:id
-Get loan details
-
-### POST /api/loans/:id/payments
-Record loan payment
-
-**Request:**
-```json
+Response (201):
 {
-  "principal_paid": 8333.33,
-  "interest_paid": 1041.67,
-  "payment_date": "2024-02-01",
-  "payment_mode": "cash"
+  "success": true,
+  "data": {
+    "id": 1,
+    "loan_number": "LN-1234567890",
+    "client_id": 1,
+    "principal_amount": 500000,
+    "interest_rate": 12,
+    "status": "active"
+  }
 }
 ```
 
-### GET /api/loans/:id/balance
-Get outstanding loan balance
+### Record Loan Payment
+```http
+POST /loans/:id/payments
+Authorization: Bearer <token>
+Content-Type: application/json
 
----
-
-## Payment Endpoints
-
-### POST /api/payments
-Record client payment
-
-**Request:**
-```json
 {
-  "client_id": 1,
-  "payment_amount": 5000,
-  "payment_mode": "bank_transfer",
-  "reference_number": "TXN123456"
+  "principal_paid": 50000,
+  "interest_paid": 5000,
+  "payment_date": "2026-07-26",
+  "payment_mode": "bank_transfer"
+}
+
+Response (201):
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "loan_id": 1,
+    "principal_paid": 50000,
+    "interest_paid": 5000,
+    "total_paid": 55000
+  }
 }
 ```
 
-### GET /api/payments
-List all payments
+### Get Loan Balance
+```http
+GET /loans/:id/balance
+Authorization: Bearer <token>
 
-### GET /api/clients/:id/payment-history
-Get payment history for client
-
----
-
-## Reports Endpoints
-
-### GET /api/reports/sales-summary
-Get sales summary report
-
-### GET /api/reports/inventory
-Get inventory report
-
-### GET /api/reports/client-ledger/:client_id
-Get client ledger
-
-### GET /api/reports/daily-summary
-Get daily financial summary
-
-### GET /api/reports/monthly-summary
-Get monthly financial summary
-
-### GET /api/reports/profit-loss
-Get profit and loss report
-
----
-
-## Barcode Endpoints
-
-### POST /api/barcodes/generate
-Generate barcode for product
-
-**Request:**
-```json
+Response (200):
 {
-  "product_id": 1,
-  "format": "CODE128"
+  "success": true,
+  "data": {
+    "loan_id": 1,
+    "principal_amount": 500000,
+    "principal_paid": 50000,
+    "principal_remaining": 450000,
+    "interest_rate": 12,
+    "interest_paid": 5000,
+    "status": "active"
+  }
 }
 ```
 
-### GET /api/barcodes/:product_id/print
-Print barcode label
+## Reports
 
----
+### Get Daily Summary
+```http
+GET /reports/daily-summary
+Authorization: Bearer <token>
 
-## Error Response Format
+Response (200):
+{
+  "success": true,
+  "data": {
+    "date": "2026-06-26",
+    "sales": {
+      "total_sales": 5,
+      "total_amount": 150000
+    },
+    "purchases": {
+      "total_purchases": 2,
+      "total_amount": 100000
+    },
+    "payments": {
+      "total_payments": 75000
+    }
+  }
+}
+```
 
-All error responses follow this format:
+### Get Sales Summary
+```http
+GET /reports/sales-summary?start_date=2026-05-26&end_date=2026-06-26
+Authorization: Bearer <token>
 
+Response (200):
+{
+  "success": true,
+  "data": {
+    "total_sales": 50,
+    "total_amount": 1500000,
+    "total_tax": 270000,
+    "net_total": 1770000
+  }
+}
+```
+
+### Get Inventory Report
+```http
+GET /reports/inventory
+Authorization: Bearer <token>
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "products": [ ... ],
+    "summary": {
+      "total_stock_value": 5000000,
+      "gold_stock_value": 3500000,
+      "silver_stock_value": 1500000,
+      "total_items": 250
+    }
+  }
+}
+```
+
+### Get Client Ledger
+```http
+GET /reports/client-ledger/:client_id
+Authorization: Bearer <token>
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "client": { ... },
+    "transactions": [ ... ],
+    "payments": [ ... ]
+  }
+}
+```
+
+## Error Responses
+
+### Unauthorized (401)
 ```json
 {
   "success": false,
-  "error": "Error message here",
-  "code": "ERROR_CODE",
-  "timestamp": "2024-01-01T12:00:00Z"
+  "error": "No token provided"
 }
 ```
 
-## Success Response Format
-
+### Not Found (404)
 ```json
 {
-  "success": true,
-  "data": {},
-  "message": "Operation successful",
-  "timestamp": "2024-01-01T12:00:00Z"
+  "success": false,
+  "error": "Client not found"
 }
 ```
 
----
-
-## Authentication
-
-All protected endpoints require JWT token in header:
-```
-Authorization: Bearer <jwt_token>
+### Server Error (500)
+```json
+{
+  "success": false,
+  "error": "Internal server error"
+}
 ```
 
 ## Rate Limiting
 
-- 100 requests per minute per IP
-- 10 failed login attempts = temporary block
+API endpoints are rate-limited to 100 requests per minute per IP address.
 
 ## Pagination
 
-List endpoints support:
-- `page` (default: 1)
-- `limit` (default: 20, max: 100)
-- `sort` (field name, prefix with `-` for descending)
+Endpoints supporting pagination use `page` and `limit` query parameters:
+- `page` (default: 1) - Page number
+- `limit` (default: 20) - Items per page (max: 100)
 
-Example: `/api/sales?page=2&limit=50&sort=-sale_date`
+## Filtering & Sorting
+
+Supported query parameters vary by endpoint. Check specific endpoint documentation.
